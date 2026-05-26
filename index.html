@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dokumentasi LSTM Water Quality</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --bg:        #F5F0E8;
+    --surface:   #EDE7D9;
+    --border:    #C8B89A;
+    --border-lt: #DDD0BC;
+    --text:      #2A2118;
+    --text-mute: #7A6A55;
+    --accent:    #5C3D1E;
+    --accent2:   #8B5E3C;
+    --code-bg:   #2C1F0F;
+    --code-text: #E8D5B0;
+    --code-str:  #A8D8A8;
+    --code-kw:   #F4A460;
+    --code-cmt:  #8A7A65;
+    --inline-bg: #D4C4A8;
+    --inline-text: #3A2810;
+    --table-head:#2C1F0F;
+    --table-alt: #E8E0D0;
+    --warn-bg:   #FFF3CD;
+    --warn-border:#C8A200;
+    --info-bg:   #E8F4F0;
+    --info-border:#4A9B7A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.75;
+    padding: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .page-wrapper {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  /* ── HEADER HERO ── */
+  .doc-hero {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 40px 48px 36px;
+    margin: -48px -40px 40px;
+    border-bottom: 3px solid var(--accent2);
+    position: relative;
+    overflow: hidden;
+  }
+  .doc-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 35%;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(255,255,255,0.03) 8px,
+      rgba(255,255,255,0.03) 9px
+    );
+  }
+  .doc-hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--code-text);
+    line-height: 1.3;
+    margin-bottom: 12px;
+    border: none;
+    padding: 0;
+  }
+  .doc-hero blockquote {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    color: #B8A080;
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+  .doc-hero blockquote p { margin: 0; }
+
+  /* ── HEADINGS ── */
+  h1, h2, h3, h4 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    color: var(--accent);
+    line-height: 1.3;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin: 44px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::before {
+    content: '§';
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent2);
+    opacity: 0.6;
+  }
+  h3 {
+    font-size: 1.15rem;
+    margin: 28px 0 10px;
+    color: var(--accent2);
+  }
+  h3::before {
+    content: '▸ ';
+    font-size: 0.75rem;
+    opacity: 0.5;
+  }
+
+  /* ── PARAGRAPHS ── */
+  p { margin: 10px 0; }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82em;
+    background: var(--inline-bg);
+    color: var(--inline-text);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border-lt);
+  }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid #4A3520;
+    border-left: 4px solid var(--accent2);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 16px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  pre code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.83em;
+    background: transparent;
+    color: var(--code-text);
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    line-height: 1.7;
+    display: block;
+    white-space: pre;
+  }
+  /* Syntax-like coloring via text patterns — pure CSS */
+  pre code .kw  { color: var(--code-kw); }
+  pre code .str { color: var(--code-str); }
+  pre code .cmt { color: var(--code-cmt); font-style: italic; }
+
+  /* ── BLOCKQUOTE / CALLOUT ── */
+  blockquote {
+    background: var(--info-bg);
+    border-left: 4px solid var(--info-border);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    color: #2A4A3A;
+  }
+  blockquote p { margin: 4px 0; }
+  blockquote strong { color: #1A3A2A; }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.88em;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  thead tr {
+    background: var(--table-head);
+    color: var(--code-text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8em;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  thead th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    border: none;
+  }
+  tbody tr { background: var(--surface); }
+  tbody tr:nth-child(even) { background: var(--table-alt); }
+  tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-lt);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ── LISTS ── */
+  ul, ol {
+    padding-left: 24px;
+    margin: 10px 0;
+  }
+  li { margin: 4px 0; }
+  li code { font-size: 0.8em; }
+
+  /* ── HORIZONTAL RULE ── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 36px 0;
+  }
+
+  /* ── STRONG / EM ── */
+  strong { color: var(--accent); font-weight: 600; }
+  em { font-style: italic; color: var(--text-mute); }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 0.82em;
+    color: var(--text-mute);
+    font-style: italic;
+    text-align: center;
+  }
+
+  /* ── PRINT SAFE ── */
+  @media print {
+    body { background: #F5F0E8; }
+    pre { page-break-inside: avoid; }
+    h2 { page-break-before: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+<div class="doc-hero"><h1 id="dokumentasi-proyek-prediksi-parameter-kualitas-air-dengan-lstm">Dokumentasi Proyek: Prediksi Parameter Kualitas Air dengan LSTM</h1><blockquote>
+<p>Proyek ini membangun model LSTM untuk memprediksi tiga parameter kualitas air — <strong>Suhu</strong>, <strong>pH</strong>, dan <strong>TDS</strong> — menggunakan data time-series sensor dengan interval 30 menit.</p>
+</blockquote></div>
+<hr />
+<h2 id="daftar-isi">Daftar Isi</h2>
+<ol>
+<li><a href="#1-gambaran-umum-proyek">Gambaran Umum Proyek</a></li>
+<li><a href="#2-struktur-file--urutan-penggunaan">Struktur File &amp; Urutan Penggunaan</a></li>
+<li><a href="#3-requirements--persiapan-lingkungan">Requirements &amp; Persiapan Lingkungan</a></li>
+<li><a href="#4-file-data_processing_stageipynb">File: <code>data_processing_stage.ipynb</code></a></li>
+<li><a href="#5-file-alpha_bipynb--model-alpha-multivariat">File: <code>alpha_b.ipynb</code> — Model Alpha (Multivariat)</a></li>
+<li><a href="#6-file-beta_bipynb--model-beta-univariat--hyperparameter-search">File: <code>beta_b.ipynb</code> — Model Beta (Univariat + Hyperparameter Search)</a></li>
+<li><a href="#7-arsitektur-model-lstm">Arsitektur Model LSTM</a></li>
+<li><a href="#8-struktur-direktori-yang-dihasilkan">Struktur Direktori yang Dihasilkan</a></li>
+<li><a href="#9-metrik-evaluasi">Metrik Evaluasi</a></li>
+<li><a href="#10-catatan-penting">Catatan Penting</a></li>
+</ol>
+<hr />
+<h2 id="1-gambaran-umum-proyek">1. Gambaran Umum Proyek</h2>
+<p>Proyek ini memprediksi nilai <strong>3 langkah ke depan</strong> (t+1, t+2, t+3) untuk setiap parameter kualitas air dari data historis 144 timestep (setara 3 hari dengan interval 30 menit).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Satuan</th>
+<th>Keterangan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Suhu (<code>temperature</code>)</td>
+<td>°C</td>
+<td>Temperatur air</td>
+</tr>
+<tr>
+<td>pH (<code>ph</code>)</td>
+<td>—</td>
+<td>Tingkat keasaman air</td>
+</tr>
+<tr>
+<td>TDS (<code>tds</code>)</td>
+<td>ppm</td>
+<td>Total Dissolved Solids, maks 1000 ppm</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alur kerja keseluruhan:</strong></p>
+<pre><code>Raw CSV Sensor
+     ↓
+data_processing_stage.ipynb  →  dataset_b/sequences/combined_sequences_corrected.csv
+     ↓
+alpha_b.ipynb  →  Model multivariat (1 model untuk semua parameter sekaligus)
+beta_b.ipynb   →  Model univariat (1 model per parameter + hyperparameter search)
+</code></pre>
+<hr />
+<h2 id="2-struktur-file-urutan-penggunaan">2. Struktur File &amp; Urutan Penggunaan</h2>
+<p>Ketiga notebook <strong>harus dijalankan berurutan</strong>:</p>
+<pre><code>1. data_processing_stage.ipynb   ← Jalankan PERTAMA
+2. alpha_b.ipynb                 ← Jalankan KEDUA  (opsional, model alternatif)
+3. beta_b.ipynb                  ← Jalankan KETIGA (model utama dengan tuning)
+</code></pre>
+<blockquote>
+<p><strong>Penting:</strong> <code>alpha_b.ipynb</code> dan <code>beta_b.ipynb</code> keduanya bergantung pada output dari <code>data_processing_stage.ipynb</code>. Pastikan preprocessing selesai sepenuhnya sebelum menjalankan salah satu dari keduanya.</p>
+</blockquote>
+<hr />
+<h2 id="3-requirements-persiapan-lingkungan">3. Requirements &amp; Persiapan Lingkungan</h2>
+<h3 id="versi-python">Versi Python</h3>
+<pre><code>Python 3.12
+</code></pre>
+<h3 id="instalasi-dependencies">Instalasi Dependencies</h3>
+<p>Buat virtual environment (disarankan) lalu install semua library berikut:</p>
+<pre><code class="language-bash">python -m venv venv
+source venv/bin/activate        # Linux/macOS
+# atau
+venv\Scripts\activate           # Windows
+
+pip install -r requirements.txt
+</code></pre>
+<p>Buat file <code>requirements.txt</code> dengan isi berikut:</p>
+<pre><code class="language-txt">numpy&gt;=1.26.0
+pandas&gt;=2.1.0
+matplotlib&gt;=3.8.0
+seaborn&gt;=0.13.0
+scipy&gt;=1.11.0
+scikit-learn&gt;=1.3.0
+tensorflow&gt;=2.15.0
+joblib&gt;=1.3.0
+plotly&gt;=5.18.0
+kaleido&gt;=0.2.1
+h5py&gt;=3.10.0
+</code></pre>
+<blockquote>
+<p><strong>Catatan <code>kaleido</code>:</strong> Diperlukan oleh Plotly untuk menyimpan visualisasi sebagai file gambar (<code>.png</code>). Jika tidak diinstall, <code>fig.write_image()</code> akan error.</p>
+</blockquote>
+<h3 id="verifikasi-instalasi">Verifikasi Instalasi</h3>
+<p>Jalankan cell pertama di notebook mana pun untuk memverifikasi:</p>
+<pre><code class="language-python">import tensorflow as tf
+print(f&quot;TensorFlow version: {tf.__version__}&quot;)  # Harus &gt;= 2.15.0
+</code></pre>
+<h3 id="dataset-input-yang-dibutuhkan">Dataset Input yang Dibutuhkan</h3>
+<p>Sebelum menjalankan notebook, siapkan file berikut:</p>
+<pre><code>dataset/
+└── dataset_unprocessed.csv     ← File sensor mentah (WAJIB ada)
+</code></pre>
+<p>Format kolom CSV yang diharapkan:</p>
+<table>
+<thead>
+<tr>
+<th>Kolom CSV Asli</th>
+<th>Keterangan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>waktu</code></td>
+<td>Timestamp format <code>DD/MM/YYYY HH:MM</code></td>
+</tr>
+<tr>
+<td><code>water_temp_c</code></td>
+<td>Suhu air (°C)</td>
+</tr>
+<tr>
+<td><code>ph_value</code></td>
+<td>Nilai pH</td>
+</tr>
+<tr>
+<td><code>tds_ppm</code></td>
+<td>Nilai TDS (ppm)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-file-data_processing_stageipynb">4. File: <code>data_processing_stage.ipynb</code></h2>
+<h3 id="tujuan">Tujuan</h3>
+<p>Mengolah data sensor mentah menjadi sequence siap-latih untuk model LSTM. Ini adalah <strong>langkah fondasi</strong> seluruh pipeline.</p>
+<h3 id="konfigurasi-utama">Konfigurasi Utama</h3>
+<pre><code class="language-python">DATA_POINTS_TOTAL  = 4320   # Total data yang digunakan (90 hari × 48 titik/hari)
+WINDOW_SIZE        = 144    # Panjang input sequence (3 hari lookback)
+FORECAST_HORIZON   = 3      # Prediksi 3 langkah ke depan (t+1, t+2, t+3)
+STEP_SIZE          = 1      # Sliding window bergeser 1 timestep
+TRAIN_RATIO        = 0.70   # 70% training
+VAL_RATIO          = 0.20   # 20% validasi
+TEST_RATIO         = 0.10   # 10% testing
+</code></pre>
+<h3 id="tahapan-preprocessing">Tahapan Preprocessing</h3>
+<p><strong>Step 1 — Load &amp; Rename Kolom</strong>
+Membaca <code>dataset/dataset_unprocessed.csv</code>, mengganti nama kolom ke format standar (<code>time</code>, <code>temperature</code>, <code>ph</code>, <code>tds</code>), mengkonversi tipe data numerik.</p>
+<p><strong>Step 2 — Filter Interval 30 Menit</strong>
+Hanya menyimpan baris dengan menit ke-0 dan ke-30 (<code>MINUTE_FILTER = [0, 30]</code>) untuk memastikan konsistensi interval.</p>
+<p><strong>Step 3 — Handle Missing Values</strong>
+Interpolasi time-based untuk mengisi nilai yang hilang, dilanjutkan forward-fill dan backward-fill untuk edge case.</p>
+<p><strong>Step 4 — Penanganan TDS Tidak Valid</strong>
+Nilai TDS negatif di-clip ke 0, nilai TDS = 0 (noise sensor) diganti dengan interpolasi linear.</p>
+<p><strong>Step 5 — IQR Outlier Handling</strong>
+Deteksi outlier menggunakan metode IQR (Q1 − 1.5×IQR hingga Q3 + 1.5×IQR), nilai di luar batas di-cap ke batas tersebut.</p>
+<p><strong>Step 6 — Batas TDS Maksimum 1000 ppm</strong>
+Nilai TDS di atas 1000 ppm di-cap dan di-rescale ulang.</p>
+<p><strong>Step 7 — Min-Max Scaling</strong>
+Normalisasi semua fitur ke rentang [0, 1] menggunakan <code>MinMaxScaler</code>. Scaler di-fit <strong>hanya pada data training</strong> untuk mencegah data leakage.</p>
+<p><strong>Step 8 — Sliding Window Sequence Generation</strong>
+Membuat sequence input-output:
+- Input <code>X</code>: shape <code>(N, 144, 3)</code> — 144 timestep, 3 fitur
+- Target <code>y</code>: shape <code>(N, 3, 3)</code> — 3 timestep ke depan, 3 fitur</p>
+<p><strong>Step 9 — Splitting &amp; Saving</strong>
+Membagi data secara kronologis (tidak acak) dan menyimpan ke format NPZ + CSV.</p>
+<h3 id="output-yang-dihasilkan">Output yang Dihasilkan</h3>
+<pre><code>dataset/
+├── dataset_cleaned_raw.csv
+└── sequences/
+    ├── combined_sequences_corrected.csv    ← Input utama untuk alpha_b &amp; beta_b
+    ├── X_train.npy / y_train.npy
+    ├── X_val.npy   / y_val.npy
+    ├── X_test.npy  / y_test.npy
+    ├── sequences.h5
+    ├── sequence_timeline.csv
+    └── metadata.json
+
+dataset_b/
+├── scaled_data.npz             ← Data scaled tersimpan
+├── scaler_X.save               ← Scaler untuk fitur input
+└── scaler_y.save               ← Scaler untuk target
+
+models/
+├── scalers.pkl
+└── scaler_info.pkl
+
+dataset/split_data/
+├── data_splits_with_labels.csv
+└── split_metadata.json
+</code></pre>
+<hr />
+<h2 id="5-file-alpha_bipynb-model-alpha-multivariat">5. File: <code>alpha_b.ipynb</code> — Model Alpha (Multivariat)</h2>
+<h3 id="tujuan_1">Tujuan</h3>
+<p>Melatih <strong>satu model LSTM tunggal</strong> yang memprediksi ketiga parameter (Suhu, pH, TDS) <strong>sekaligus</strong> dalam satu output multivariat. Ini adalah pendekatan model terpadu dengan arsitektur 2 layer LSTM.</p>
+<h3 id="cara-menjalankan">Cara Menjalankan</h3>
+<ol>
+<li>Pastikan <code>data_processing_stage.ipynb</code> sudah selesai dijalankan</li>
+<li>Buka <code>alpha_b.ipynb</code></li>
+<li>Jalankan semua cell dari atas ke bawah</li>
+</ol>
+<h3 id="konfigurasi-model">Konfigurasi Model</h3>
+<pre><code class="language-python">LEARNING_RATE = 0.0005
+BATCH_SIZE    = 32
+EPOCHS        = 100000   # EarlyStopping akan berhenti lebih awal
+</code></pre>
+<p>Callbacks yang digunakan:
+- <code>ReduceLROnPlateau</code> — menurunkan learning rate 50% jika <code>val_loss</code> tidak membaik selama 5 epoch
+- <code>ModelCheckpoint</code> — menyimpan bobot terbaik otomatis ke <code>models_alpha/alpha_b.keras</code>
+- <code>EarlyStopping</code> — berhenti training jika <code>val_loss</code> tidak membaik selama 20 epoch</p>
+<h3 id="output-yang-dihasilkan_1">Output yang Dihasilkan</h3>
+<pre><code>models_alpha/
+├── alpha_b.keras               ← Checkpoint bobot terbaik selama training
+├── alpha_b_final.keras         ← Model final tersimpan manual
+├── history_b.pkl               ← History training (Python pickle)
+└── history_b.csv               ← History training (CSV)
+
+results/alpha_b/
+├── test_predictions_B.png      ← Prediksi vs aktual (sample acak)
+├── test_prediction_combined_b.png  ← Prediksi vs aktual (full test set)
+├── error_distribution_B.png    ← Distribusi error residual
+└── prediksi_144_kedepan_full_B.png ← Forecast 144 langkah ke depan
+</code></pre>
+<hr />
+<h2 id="6-file-beta_bipynb-model-beta-univariat-hyperparameter-search">6. File: <code>beta_b.ipynb</code> — Model Beta (Univariat + Hyperparameter Search)</h2>
+<h3 id="tujuan_2">Tujuan</h3>
+<p>Melatih <strong>tiga model LSTM terpisah</strong> — satu per parameter (Suhu, pH, TDS) — dengan <strong>pencarian hyperparameter exhaustive</strong> untuk menemukan kombinasi terbaik. Pendekatan ini memberikan fleksibilitas lebih tinggi karena setiap parameter dapat memiliki arsitektur optimal sendiri.</p>
+<h3 id="cara-menjalankan_1">Cara Menjalankan</h3>
+<ol>
+<li>Pastikan <code>data_processing_stage.ipynb</code> sudah selesai dijalankan</li>
+<li>Buka <code>beta_b.ipynb</code></li>
+<li>Jalankan semua cell dari atas ke bawah</li>
+</ol>
+<blockquote>
+<p><strong>Peringatan waktu:</strong> Notebook ini menjalankan <strong>30 kombinasi hyperparameter</strong> × 3 parameter = <strong>90 training run</strong>. Estimasi waktu sangat bergantung pada hardware yang digunakan.</p>
+</blockquote>
+<h3 id="grid-hyperparameter-search">Grid Hyperparameter Search</h3>
+<pre><code class="language-python">units_list   = [16, 32, 64, 128, 256]   # Jumlah unit LSTM
+dropout_list = [0.1, 0.2]               # Dropout rate
+lr_list      = [0.001, 0.0005, 0.0001]  # Learning rate
+
+# Total kombinasi: 5 × 2 × 3 = 30 kombinasi per parameter
+</code></pre>
+<h3 id="konfigurasi-training">Konfigurasi Training</h3>
+<pre><code class="language-python">BATCH_SIZE = 32
+EPOCHS     = 100000   # Dibatasi EarlyStopping
+</code></pre>
+<p>Callbacks per run:
+- <code>ReduceLROnPlateau</code> — patience=5, factor=0.5
+- <code>EarlyStopping</code> — patience=10, restore best weights</p>
+<h3 id="pemilihan-model-terbaik">Pemilihan Model Terbaik</h3>
+<p>Untuk setiap parameter, model dengan <strong>validation loss (MSE) terendah</strong> di antara 30 kombinasi yang dipilih sebagai model terbaik.</p>
+<h3 id="output-yang-dihasilkan_2">Output yang Dihasilkan</h3>
+<pre><code>models_beta/
+├── beta_b_suhu_final.keras             ← Model terbaik untuk Suhu
+├── beta_b_ph_final.keras               ← Model terbaik untuk pH
+├── beta_b_tds_final.keras              ← Model terbaik untuk TDS
+├── dataset_b_suhu_best.keras           ← Checkpoint terbaik selama search
+├── dataset_b_ph_best.keras
+├── dataset_b_tds_best.keras
+├── history_b_suhu.pkl / .csv           ← History model terbaik Suhu
+├── history_b_ph.pkl / .csv             ← History model terbaik pH
+├── history_b_tds.pkl / .csv            ← History model terbaik TDS
+├── metrics_test_b.csv                  ← Tabel metrik evaluasi test set
+├── train_val_loss_curves_b.png         ← Kurva loss training vs validasi
+├── pred_vs_actual_test_b.png           ← Prediksi vs aktual test set
+├── error_distribution_b.png           ← Distribusi error residual
+└── future_forecast_144_b.png          ← Forecast 144 langkah ke depan
+</code></pre>
+<hr />
+<h2 id="7-arsitektur-model-lstm">7. Arsitektur Model LSTM</h2>
+<h3 id="model-alpha-arsitektur-2-layer-multivariat">Model Alpha — Arsitektur 2 Layer (Multivariat)</h3>
+<pre><code>Input: (batch, 144 timesteps, 3 fitur)
+         ↓
+   LSTM(256 units, return_sequences=True)
+         ↓
+   Dropout(0.2)
+         ↓
+   LSTM(128 units, return_sequences=False)
+         ↓
+   Dropout(0.2)
+         ↓
+   Dense(9)         ← 3 langkah × 3 parameter = 9 output
+         ↓
+   Reshape(3, 3)
+         ↓
+Output: (batch, 3 langkah, 3 parameter)
+</code></pre>
+<p><strong>Loss function:</strong> MSE<br />
+<strong>Optimizer:</strong> Adam (lr=0.0005)<br />
+<strong>Metrik:</strong> RMSE, MAE, MAPE, SMAPE, R²</p>
+<hr />
+<h3 id="model-beta-arsitektur-1-layer-univariat-per-parameter">Model Beta — Arsitektur 1 Layer (Univariat, per parameter)</h3>
+<pre><code>Input: (batch, window_size timesteps, 1 fitur)
+         ↓
+   LSTM(units)        ← units dipilih dari {16, 32, 64, 128, 256}
+         ↓
+   Dropout(rate)      ← rate dipilih dari {0.1, 0.2}
+         ↓
+   Dense(3)           ← prediksi t+1, t+2, t+3 untuk 1 parameter
+         ↓
+Output: (batch, 3 langkah)
+</code></pre>
+<p><strong>Loss function:</strong> MSE<br />
+<strong>Optimizer:</strong> Adam (lr dipilih dari {0.001, 0.0005, 0.0001})<br />
+<strong>Metrik:</strong> RMSE, MAE, MAPE, SMAPE, R²</p>
+<hr />
+<h3 id="perbandingan-alpha-vs-beta">Perbandingan Alpha vs Beta</h3>
+<table>
+<thead>
+<tr>
+<th>Aspek</th>
+<th>Alpha</th>
+<th>Beta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pendekatan</td>
+<td>Multivariat (1 model)</td>
+<td>Univariat (3 model)</td>
+</tr>
+<tr>
+<td>Jumlah model</td>
+<td>1</td>
+<td>3 (per parameter)</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>3 fitur sekaligus</td>
+<td>1 fitur per model</td>
+</tr>
+<tr>
+<td>Hyperparameter</td>
+<td>Fixed</td>
+<td>Grid search (30 kombinasi)</td>
+</tr>
+<tr>
+<td>Kompleksitas training</td>
+<td>Lebih cepat</td>
+<td>Lebih lama (90 run)</td>
+</tr>
+<tr>
+<td>Fleksibilitas</td>
+<td>Rendah</td>
+<td>Tinggi</td>
+</tr>
+<tr>
+<td>Lapisan LSTM</td>
+<td>2 (256 → 128)</td>
+<td>1 (dicari otomatis)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-struktur-direktori-yang-dihasilkan">8. Struktur Direktori yang Dihasilkan</h2>
+<p>Setelah menjalankan semua notebook, struktur folder akan terlihat seperti berikut:</p>
+<pre><code>project_root/
+├── dataset/
+│   ├── dataset_unprocessed.csv         ← INPUT (harus ada)
+│   ├── dataset_cleaned_raw.csv
+│   ├── sequences/
+│   │   ├── combined_sequences_corrected.csv
+│   │   ├── X_train.npy, y_train.npy
+│   │   ├── X_val.npy, y_val.npy
+│   │   ├── X_test.npy, y_test.npy
+│   │   └── metadata.json
+│   └── split_data/
+│       ├── data_splits_with_labels.csv
+│       └── split_metadata.json
+│
+├── dataset_b/
+│   ├── scaled_data.npz
+│   ├── scaler_X.save
+│   └── scaler_y.save
+│
+├── models/
+│   ├── scalers.pkl
+│   └── scaler_info.pkl
+│
+├── models_alpha/
+│   ├── alpha_b_final.keras
+│   └── history_b.csv
+│
+├── models_beta/
+│   ├── beta_b_suhu_final.keras
+│   ├── beta_b_ph_final.keras
+│   ├── beta_b_tds_final.keras
+│   └── metrics_test_b.csv
+│
+├── results/alpha_b/
+│   └── *.png
+│
+├── visualizations/
+│   └── *.png
+│
+├── data_processing_stage.ipynb
+├── alpha_b.ipynb
+└── beta_b.ipynb
+</code></pre>
+<hr />
+<h2 id="9-metrik-evaluasi">9. Metrik Evaluasi</h2>
+<p>Kedua model menggunakan 5 metrik evaluasi berikut:</p>
+<table>
+<thead>
+<tr>
+<th>Metrik</th>
+<th>Nama Lengkap</th>
+<th>Keterangan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RMSE</strong></td>
+<td>Root Mean Squared Error</td>
+<td>Sensitif terhadap error besar</td>
+</tr>
+<tr>
+<td><strong>MAE</strong></td>
+<td>Mean Absolute Error</td>
+<td>Error rata-rata dalam satuan asli</td>
+</tr>
+<tr>
+<td><strong>MAPE</strong></td>
+<td>Mean Absolute Percentage Error</td>
+<td>Error dalam persentase</td>
+</tr>
+<tr>
+<td><strong>SMAPE</strong></td>
+<td>Symmetric MAPE</td>
+<td>MAPE versi simetris, lebih stabil</td>
+</tr>
+<tr>
+<td><strong>R²</strong></td>
+<td>Coefficient of Determination</td>
+<td>Seberapa baik model menjelaskan variansi data (0–1, makin tinggi makin baik)</td>
+</tr>
+</tbody>
+</table>
+<p>Hasil evaluasi disimpan ke <code>models_beta/metrics_test_b.csv</code> (Beta) dan dicetak di console (Alpha).</p>
+<hr />
+<h2 id="10-catatan-penting">10. Catatan Penting</h2>
+<p><strong>Urutan eksekusi wajib dipatuhi.</strong> <code>alpha_b.ipynb</code> dan <code>beta_b.ipynb</code> membaca file dari <code>dataset_b/</code> yang hanya ada setelah <code>data_processing_stage.ipynb</code> selesai.</p>
+<p><strong>Waktu training Beta sangat panjang.</strong> Dengan 90 kombinasi training dan <code>EPOCHS = 100000</code> (dibatasi EarlyStopping), estimasi waktu bisa beberapa jam tergantung hardware. Disarankan menggunakan GPU.</p>
+<p><strong>Aktifkan GPU jika tersedia.</strong> TensorFlow secara otomatis menggunakan GPU jika CUDA tersedia. Verifikasi dengan:</p>
+<pre><code class="language-python">import tensorflow as tf
+print(tf.config.list_physical_devices('GPU'))
+</code></pre>
+<p><strong>Data sensor TDS.</strong> Pipeline memiliki penanganan khusus untuk nilai TDS = 0 (dianggap noise sensor) dan nilai negatif. Pastikan sensor TDS sudah terkalibrasi dengan benar sebelum menggunakan dataset baru.</p>
+<p><strong>Scaler hanya di-fit pada data training.</strong> Ini adalah praktik standar untuk mencegah data leakage — <code>scaler_X</code> dan <code>scaler_y</code> hanya belajar dari split training, lalu diterapkan ke validasi dan test.</p>
+<p><strong>File model tersimpan dalam format <code>.keras</code></strong> (format baru TensorFlow 2.x). Untuk memuat model:</p>
+<pre><code class="language-python">from tensorflow.keras.models import load_model
+model = load_model('models_beta/beta_b_suhu_final.keras')
+</code></pre>
+<hr />
+<div class="doc-footer"><em>Dokumentasi ini dibuat berdasarkan analisis kode dari <code>data_processing_stage.ipynb</code>, <code>alpha_b.ipynb</code>, dan <code>beta_b.ipynb</code>.</em></div>
+</div>
+</body>
+</html>
